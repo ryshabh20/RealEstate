@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate, useNavigationType } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   signInStart,
@@ -20,9 +20,14 @@ export default function SignUp() {
       [e.target.id]: e.target.value,
     });
   };
+  const handleSignInSuccess = () => {
+    // Navigate to "/" when OAuth sign-in is successful
+    Navigate("/");
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log(formData);
       dispatch(signInStart());
       const res = await fetch("/api/auth/signin", {
         method: "POST",
@@ -69,7 +74,10 @@ export default function SignUp() {
         >
           {loading ? "Loading" : "Sign In"}
         </button>
-        <OAuth className="bg-indigo-500" />
+        <OAuth
+          className="bg-indigo-500"
+          onSignInSuccess={handleSignInSuccess}
+        />
       </form>
       <div className="flex gap-2 mt-5">
         <p className="text-white">Create an account?</p>

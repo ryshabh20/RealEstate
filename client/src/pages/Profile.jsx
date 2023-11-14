@@ -1,6 +1,18 @@
 import { useRef, useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { app } from "../firebase";
+import { Link } from "react-router-dom";
+import {
+  updateUserFailure,
+  updateUserStart,
+  updateUserSuccess,
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  logoutUserFailure,
+  logoutUserStart,
+  logoutUserSuccess,
+} from "../redux/user/userSlice";
 import {
   getDownloadURL,
   getStorage,
@@ -8,16 +20,20 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 export default function Profile() {
+  const dispatch = useDispatch();
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
-  const { currentUser } = useSelector((state) => {
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const { currentUser, loading, error } = useSelector((state) => {
     return state.user;
   });
+  console.log("this is the error", error);
   const [data, setData] = useState({
     username: currentUser.username,
     email: currentUser.email,
+    password: "",
   });
 
   useEffect(() => {
@@ -43,29 +59,72 @@ export default function Profile() {
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
-          setFormData({ ...formData, avatar: downloadURL })
+          setData({ ...data, avatar: downloadURL })
         );
       }
     );
   };
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
+  };
   const handleOnSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch(`/api/user/update/${currentUser.id}`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await res.json();
-    console.log(result);
+    try {
+      dispatch(updateUserStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      console.log("this is the result ", result);
+      if (result.success === false) {
+        dispatch(updateUserFailure(result.message));
+        return;
+      }
+      setUpdateSuccess(true);
+      dispatch(updateUserSuccess(result));
+    } catch (error) {
+      dispatch(updateUserFailure(error.message));
+    }
   };
   const handleOnChange = (e) => {
+    const { id, value } = e.target;
     setData({
       ...data,
-      [e.target.id]: e.target.value,
+      [id]: value,
     });
     console.log(data);
+  };
+  const handleLogout = async () => {
+    try {
+      dispatch(logoutUserStart());
+      const res = await fetch("/api/auth/logout");
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(logoutUserFailure(data.message));
+        return;
+      }
+      dispatch(logoutUserSuccess(data));
+    } catch (error) {
+      dispatch(logoutUserFailure(error.message));
+    }
   };
 
   return (
@@ -123,20 +182,37 @@ export default function Profile() {
         />
         <button
           type="submit"
+          disabled={loading}
           className="bg-blue rounded-lg text-white p-2 hover:opacity-95 disabled:opacity-80"
         >
-          Update
+          {loading ? "Loading" : "Update"}
         </button>
-        <button className="bg-orange-gradient rounded-lg text-white p-2 hover:opacity-95 disabled:opacity-80">
-          Create Listing
-        </button>
+        <Link
+          className="bg-orange-gradient rounded-lg text-white text-center p-2 hover:opacity-95 disabled:opacity-80"
+          to="/create-listing"
+        >
+          <button>Create Listing</button>
+        </Link>
       </form>
       <div className="flex justify-between mt-5">
-        <span className="text-red cursor-pointer font-medium">
+        <span
+          onClick={handleDeleteUser}
+          className="text-red cursor-pointer font-medium"
+        >
           Delete Account
         </span>
-        <span className="text-red cursor-pointer font-medium">Sign out</span>
+        <span
+          onClick={handleLogout}
+          className="text-red cursor-pointer font-medium"
+        >
+          Sign out
+        </span>
       </div>
+
+      <p className="text-red mt-5">{error ? error : ""}</p>
+      <p className="text-blue mt-5">
+        {updateSuccess ? "User is updated successfully!" : ""}
+      </p>
     </div>
   );
 }
