@@ -31,7 +31,6 @@ export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => {
     return state.user;
   });
-  console.log("this is the error", error);
   const [data, setData] = useState({
     username: currentUser.username,
     email: currentUser.email,
@@ -95,7 +94,6 @@ export default function Profile() {
         body: JSON.stringify(data),
       });
       const result = await res.json();
-      console.log("this is the result ", result);
       if (result.success === false) {
         dispatch(updateUserFailure(result.message));
         return;
@@ -112,7 +110,6 @@ export default function Profile() {
       ...data,
       [id]: value,
     });
-    console.log(data);
   };
   const handleLogout = async () => {
     try {
@@ -172,7 +169,7 @@ export default function Profile() {
         />
         <p className="text-sm self-center">
           {fileUploadError ? (
-            <span className="text-red-700">
+            <span className="text-red">
               Error Image upload (image must be less than 2 mb)
             </span>
           ) : filePerc > 0 && filePerc < 100 ? (
@@ -257,7 +254,7 @@ export default function Profile() {
           {userListings.map((listing) => {
             return (
               <div
-                key={listing.id}
+                key={listing._id}
                 className="mt-7 border-y border-double border-white  p-3 flex justify-between items-center gap-4"
               >
                 <Link to={`/listing/${listing._id}`}>
@@ -281,7 +278,9 @@ export default function Profile() {
                   >
                     Delete
                   </button>
-                  <button className="text-blue uppercase">Edit</button>
+                  <Link to={`/update-listing/${listing._id}`}>
+                    <button className="text-blue uppercase">Edit</button>
+                  </Link>
                 </div>
               </div>
             );
