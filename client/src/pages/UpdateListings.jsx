@@ -44,6 +44,7 @@ export default function UpdateListing() {
         console.log(data.message);
       }
       setFormData(data);
+      console.log(data);
     };
     fetchListing();
   }, []);
