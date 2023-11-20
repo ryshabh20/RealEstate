@@ -12,13 +12,14 @@
     "react-icons": "^4.11.0",
     "redux-persist": "^6.0.0"
   },
-  "name": "new-folder-(2)",
+  "name": "Second Floor",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon api/index.js",
-    "start": "node api/index.js"
+    "start": "node api/index.js",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client"
   },
   "type": "module",
   "keywords": [],
