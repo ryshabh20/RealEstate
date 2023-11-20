@@ -17,6 +17,7 @@ import {
   FaParking,
   FaShare,
 } from "react-icons/fa";
+import Contact from "../components/Contact";
 
 export default function Listings() {
   const params = useParams();
@@ -25,7 +26,8 @@ export default function Listings() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
   const { currentUser } = useSelector((state) => state.user);
-  console.log(currentUser._id);
+  const [contact, setContact] = useState(false);
+
   useEffect(() => {
     const fetchListing = async () => {
       try {
@@ -74,8 +76,7 @@ export default function Listings() {
               slideShadows: true,
             }}
             pagination={{ clickable: true }}
-           
-            modules={[EffectCoverflow, Pagination, Mousewheel]}
+            modules={[EffectCoverflow, Pagination]}
             className="mySwiper"
           >
             {listing.imageUrls.map((url) => (
@@ -124,7 +125,7 @@ export default function Listings() {
                 {listing.type === "rent" ? "For Rent" : "For Sale"}
               </p>
               {listing.offer && (
-                <p className="bg-green-400 w-full max-w-[200px] text-white text-center p-1 rounded-md">
+                <p className="bg-green-600 w-full max-w-[200px] text-white text-center p-1 rounded-md">
                   ${+listing.regularPrice - +listing.discountPrice} OFF
                 </p>
               )}
@@ -155,6 +156,15 @@ export default function Listings() {
                 {listing.furnished ? "Furnished" : "Unfurnished"}
               </li>
             </ul>
+            {currentUser && listing.userRef !== currentUser._id && !contact && (
+              <button
+                onClick={() => setContact(true)}
+                className="bg-blue text-white rounded-lg uppercase hover:opacity-95 p-3"
+              >
+                Contact landlord
+              </button>
+            )}
+            {contact && <Contact listing={listing} />}
           </div>
         </div>
       )}
