@@ -11,11 +11,9 @@
     "nodemon": "^3.0.1",
     "react-icons": "^4.11.0",
     "redux-persist": "^6.0.0"
-  },
+  }
   
-  "engines": {
-    "node": ">=14.17.0"
-  },
+ 
   "name": "SkyScape",
   "version": "1.0.0",
   "main": "index.js",
